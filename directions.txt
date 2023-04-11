@@ -1,0 +1,573 @@
+DEFINING AND USING A FIRST CLASS
+
+- classes allow us to build objects using a specific blueprint.
+    - objects - the things you work with in code
+        - instances of classes (based on classes)
+        - class-based cretation is an alternative to using object literals
+            - where data differs, but not the the structure.
+    - classes - blueprints for objects(theoretical definition.)
+        - define how objects look, which properties and methods they have.
+
+- in productList
+    -     new Product(),
+        - returns a new object which has the structure below
+
+- class Product {
+  // title = "DEFAULT";
+  // imageUrl;
+  // description;
+  // price;
+
+  constructor(title, image, desc, price) {
+    this.title = title;
+    this.imageUrl = image;
+    this.description = desc;
+    this.price = price;
+  }
+}
+
+    - constructor method/function
+        - can accept arguments (title, image, desc, price).
+            - any that you want.
+        - assign the values using "this" keyword
+            - this refers to the class Product.
+
+-   products: [
+    new Product(
+      "A Pillow",
+      "https://images-us-prod.cms.dynamics365commerce.ms/cms/api/cncgmclkfv/imageFileData/search?fileName=/Products%2F140091P%20%5E%20%20%5E%20Std%20Queen%20%5E%20%20%5E%20Prime_000_001.png&fallback=/Products/140091P_000_001.png,Product-Fallback-Image.png&m=6&q=80&cropfocalregion=true",
+      "Crazy comfy pillow!",
+      139.99
+    ),
+    new Product(
+      "A Carpet",
+      "https://www.claremontrug.com/antique-oriental-rugs-carpets/images_rugs/6944/Antique-Persian-Tabriz-Rug-11x16-1.SGE4.SINGLE.jpg",
+      "Put your room in the spotlight with this shiny carpet!",
+      89.99
+    ),
+  ],
+    - using the class as a blueprint. Easier way of re-creating objects.
+        - you can't miss/omit properties
+
+FIELDS VS PROPERTIES 
+
+class Product{
+    category = "DEFAULT";
+    constructor(title){
+        this.title = title;
+    }
+    printInfo(){
+        console.log(this.title, this.category)
+    }
+}
+    - class field = category = "DEFAULT".
+    - class property = this.title = title.
+    - fields define properties for classes.
+    - class method = printInfo.
+
+
+USING AND CONNECTING MULTIPLE CLASSES 
+
+- class Product {
+  // title = "DEFAULT";
+  // imageUrl;
+  // description;
+  // price;
+
+  constructor(title, image, desc, price) {
+    this.title = title;
+    this.imageUrl = image;
+    this.description = desc;
+    this.price = price;
+  }
+}
+    - The Product class has four properties: title, imageUrl, description, and price. It also has a constructor that takes in these 
+    properties as arguments and assigns them to the corresponding properties of the instance of the Product class.
+
+- class ProductItem {
+  constructor(product) {
+    this.product = product;
+  }
+  render() {
+    const prodEl = document.createElement("li");
+    prodEl.className = "product-item";
+    prodEl.innerHTML = `
+            <div>
+            <img src="${this.product.imageUrl}" alter="${this.product.title}">
+            <div class="product-item__content">
+            <h2>${this.product.title}</h2>
+            <h3>\$${this.product.price}</h3>
+            <p>${this.product.description}</p>
+            <button>Add to Cart</button>
+            </div>
+            </div>`;
+    return prodEl;
+  }
+}
+
+    - The ProductItem class takes an instance of the Product class as an argument in its constructor and has a method called render() that 
+    creates an HTML list item (<li>) element with the product's image, title, description, price, and "Add to Cart" button. The product's 
+    properties are accessed via the this.product syntax.
+        - why does this work with the lowercase "product" argument and not with the uppercase "Product" argument?
+            - In JavaScript, class names usually start with an uppercase letter, while variable and function names usually start with a 
+            lowercase letter. This is a convention, and not a requirement of the language.
+            In the code you provided, the Product class name is capitalized, while the product parameter name in the ProductItem constructor 
+            is lowercase.
+        The reason this works is because JavaScript is case-sensitive, so product and Product are treated as different identifiers. 
+        The product parameter in the ProductItem constructor is simply a variable that receives a value, and it can be named whatever you 
+        like (as long as it's a valid identifier).
+        The important thing is that the product parameter is assigned to the product property of the ProductItem instance, 
+        which is then used to access the properties of the Product instance.
+    So, it doesn't matter whether the parameter name is lowercase or uppercase - as long as it is assigned to the product property, 
+    it will work the same way.
+
+    - where is ProductItem accessing properties of the "Product" instance?
+        - The ProductItem class is accessing the properties of the Product instance in the render method, specifically in the following lines:
+                -<img src="${this.product.imageUrl}" alter="${this.product.title}">
+                <h2>${this.product.title}</h2>
+                <h3>\$${this.product.price}</h3>
+                <p>${this.product.description}</p>
+                    - In these lines, the this.product expression is referring to the Product instance that was passed to the ProductItem 
+                    constructor, which is stored in the product property of the ProductItem instance.
+                    So, when the render method is called on a ProductItem instance, it generates HTML markup that includes the imageUrl, 
+                    title, price, and description properties of the Product instance that it received.
+
+- class ProductList {
+  products = [
+    new Product(
+      "A Pillow",
+      "https://images-us-prod.cms.dynamics365commerce.ms/cms/api/cncgmclkfv/imageFileData/search?fileName=/Products%2F140091P%20%5E%20%20%5E%20Std%20Queen%20%5E%20%20%5E%20Prime_000_001.png&fallback=/Products/140091P_000_001.png,Product-Fallback-Image.png&m=6&q=80&cropfocalregion=true",
+      "Crazy comfy pillow!",
+      139.99
+    ),
+    new Product(
+      "A Carpet",
+      "https://www.claremontrug.com/antique-oriental-rugs-carpets/images_rugs/6944/Antique-Persian-Tabriz-Rug-11x16-1.SGE4.SINGLE.jpg",
+      "Put your room in the spotlight with this shiny carpet!",
+      89.99
+    ),
+  ];
+
+  constructor() {}
+
+  render() {
+    const renderHook = document.getElementById("app");
+    const prodList = document.createElement("ul");
+    prodList.className = "product-list";
+    for (const prod of this.products) {
+      const productItem = new ProductItem(prod);
+      const prodEl = productItem.render();
+      prodList.append(prodEl);
+    }
+    renderHook.append(prodList);
+  }
+}
+        - The ProductList class creates an array of Product objects as its property products. It has a constructor that doesn't do anything 
+        in this case, but could be used to set up some initial state or to retrieve data from a server. It also has a render() method that 
+        creates an HTML unordered list (<ul>) element with a class of "product-list", loops over the products array, creates an instance of 
+        the ProductItem class for each Product, and appends the resulting HTML elements to the <ul> element. Finally, the render() method 
+        appends the <ul> element to a DOM element with the ID "app", which should be defined in the HTML file.
+
+
+- const productList = new ProductList();
+    productList.render();
+        - The last few lines of code create an instance of the ProductList class and call its render() method, which generates the HTML for 
+        the product list and appends it to the DOM.
+        - The first line const productList = new ProductList() creates a new instance of the ProductList class and assigns it to a variable 
+        called productList. This variable now holds a reference to the newly created object, which has access to the properties and methods 
+        of the ProductList class.
+        - The second line productList.render() calls the render method on the productList instance, which generates HTML markup for 
+        displaying the list of products on a web page. This method loops through the products array of the ProductList instance, creates 
+        a new ProductItem instance for each Product in the array, and appends the resulting HTML markup to a new ul element. Finally, it 
+        appends the ul element to the HTML document, so that the list of products is displayed on the web page.
+
+
+-  why does a new instance of ProductList have to be called and rendered, if it's already being rendered in the class?
+        - The ProductList class has a render method that generates HTML markup for displaying the list of products. However, this method does 
+not automatically get called when an instance of the class is created. Therefore, in order to display the list of products on a web page, 
+you need to create a new instance of the ProductList class and then call its render method explicitly.
+When you create a new instance of the ProductList class by calling const productList = new ProductList(), you create a new object that 
+has access to the products array and the render method of the class. However, this new instance is not automatically rendered on the web 
+page until you explicitly call its render method by calling productList.render().
+So, creating a new instance of ProductList and then calling its render method is necessary to display the list of products on the web page.
+
+- does the same hold true for the render method in class ProductItem?
+    - No, the render method in the ProductItem class is not designed to render anything directly to the web page. Instead, it generates 
+    an HTML element that represents a single product item and returns it as a result. The HTML element generated by the render method can 
+    be used by other functions or classes to display the product item on the web page.
+    In the given code, the render method of the ProductItem class is called by the render method of the ProductList class for each product 
+    item in the products array. The render method of the ProductList class then appends the generated HTML element to a parent element 
+    on the web page.
+    So, the render method of the ProductItem class is not directly responsible for rendering anything to the web page. 
+    Its responsibility is to generate a single HTML element that represents a product item, which is then used by other parts of the 
+    code to display the product items on the web page.
+
+
+BINDING CLASS METHODS AND WORKING WITH "THIS" 
+
+- getting add to cart button to work.
+    -  const addCartButton = prodEl.querySelector("button");
+    - addCartButton.addEventListener("click", this.addToCart.bind(this));
+        - use bind to bind "this" inside of addToCart.
+            - refers to the entire ProductItem object.
+    -   addToCart() {
+    console.log("Adding product to cart...");
+    console.log(this.product);
+  }
+    - method to log the product.
+
+
+ADDING A CART AND SHOP CLASS 
+
+- class ShoppingCart {
+  items = [];
+
+  render() {
+    const cartEl = document.createElement("section");
+    cartEl.innerHTML = `
+        <h2>Total: \$${0}</h2>
+        <button>Order Now!</button>
+        `;
+    cartEl.className = "cart";
+    return cartEl;
+  }
+}
+
+    - ShoppingCart class is used to create a shopping cart, and it has an array named items that keeps the products added to the cart. 
+    It also has a method named render() that creates and returns a new HTML section element with a header, a total price, and an order button.
+
+
+- class Shop {
+  render() {
+    const renderHook = document.getElementById("app");
+    const cart = new ShoppingCart();
+    const cartEl = cart.render();
+    const productList = new ProductList();
+    const prodListElement = productList.render();
+
+    renderHook.append(cartEl);
+    renderHook.append(prodListElement);
+  }
+}
+
+const shop = new Shop();
+shop.render();
+
+    - Shop class is used to create the online shop. It has a method named render() that creates and renders the shopping cart and the 
+    product list elements on the web page. It creates instances of ShoppingCart and ProductList classes, and it appends their HTML elements 
+    to the web page's root element. Finally, it creates an instance of itself, and it calls the render() method to start the 
+    rendering process.
+
+
+COMMUNICATING CAN BE CHALLENGING! 
+
+- class ShoppingCart {
+  items = [];
+
+  addProduct(product) {
+    this.items.push(product);
+    this.totalOutput = `<h2>Total: \$${1}</h2>`;
+  }
+
+  render() {
+    const cartEl = document.createElement("section");
+    cartEl.innerHTML = `
+        <h2>Total: \$${0}</h2>
+        <button>Order Now!</button>
+        `;
+    cartEl.className = "cart";
+    this.totalOutput = cartEl.querySelector("h2");
+    return cartEl;
+  }
+}
+    - class ShoppingCart Defines a new class called ShoppingCart.
+    - items = [];: Initializes a property called items to an empty array. This property will store the selected products in the shopping cart.
+addProduct(product) Defines a method called addProduct that takes a product argument. This method adds the product to the items array and 
+sets the totalOutput property to a string that contains an HTML h2 element with a total of $1.
+    -this.items.push(product);: Adds the product to the items array.
+    - this.totalOutput = <h2>Total: $${1}</h2>;: Sets the totalOutput property to a string that contains an HTML h2 element with a total 
+    of $1.
+    - render() Defines a method called render.
+    - const cartEl = document.createElement("section");: Creates a new section element in the DOM and assigns it to a variable called cartEl.
+    - cartEl.innerHTML = ...;: Sets the innerHTML property of the cartEl element to a string that contains an HTML h2 element with a 
+    total of $0 and an "Order Now!" button.
+    -  cartEl.className = "cart";: Sets the className property of the cartEl element to "cart".
+     - this.totalOutput = cartEl.querySelector("h2");: Sets the totalOutput property to the h2 element within the cartEl element.
+    - return cartEl;: Returns the cartEl element, which can be appended to the DOM to display the shopping cart.
+
+
+STATIC METHODS AND PROPERTIES 
+
+- static method
+    - defined with static keyword
+    - only accessible on class iteself, without instantiation( not on the instance)
+    - typically used in helped classes, global configuration
+
+- instance method
+    - defined witout static keyword
+    - only accessible on instances(=objects) based on class
+    - used for core, resusable logic
+
+
+
+- class App {
+  static cart;
+  static init() {
+    const shop = new Shop();
+    shop.render();
+    this.cart = shop.cart;
+  }
+
+  static addProductToCart(product) {
+    this.cart.addProduct(product);
+  }
+}
+
+App.init();
+
+    - This class acts as the entry point to the application and has a static init method that creates a new Shop instance and calls 
+    its render method. It also has a static property cart that holds a reference to the shopping cart instance. Additionally, it has a 
+    static method addProductToCart that takes a product as its parameter and adds it to the shopping cart instance.
+        - defines a class named "App".
+        - declares a static property named "cart" on the App class, which will be used to store the shopping cart object.
+        - defines a static method named "init" on the App class. This method will be called when the application is initialized, 
+        and it will set up the shopping page.
+        - creates a new instance of the Shop class and assigns it to a variable named "shop".
+        - calls the "render" method on the Shop instance, which will render the shopping page.
+        - assigns the shopping cart object from the Shop instance to the static "cart" property of the App class.
+        -  defines a static method named "addProductToCart" on the App class. This method will be called when a product is added to the 
+        shopping cart.
+        - calls the "addProduct" method on the shopping cart object stored in the static "cart" property of the App class, 
+        passing in the product that was added to the cart.
+        - calls the "init" method on the App class to initialize the application and render the shopping page.
+
+FIRST SUMMARY AND CLASSES VS OBJECT LITERALS 
+
+- const shop = new Shop();
+    - just an object.
+    - const shop = {};
+    - const {} = shop;
+        - you can use any method you would normally use on an object.
+
+- are object literals ({}) obsolete?
+    - no.
+        - great for general data grouping, objects which you only create once.
+        - quick and easy to create, no overhead.
+    - also consider classes.
+        -great when you re-create the same type of object over and over again.
+        - more overhead initially, but easy "object duplication" thereafter.
+
+GETTERS AND SETTERS 
+
+-   get totalAmount() {
+    const sum = this.items.reduce((prevValue, curItem) => {
+      return prevValue + curItem.price;
+    }, 0);
+    return sum;
+  }
+    - gets the sum for total amount.
+    - this.items.reduce 
+        - reduces array of values into a single value.
+    - 2 args, prevValue and curItem.
+        - prevValue represents the accumulated value from previous iterations, which is initially set to 0 as second arg.
+        - curItem represents the current item in the items array.
+    - inside the callback function, price property of curItem is accessed and added to prevValue using the "+" operator.
+        - result is returned and becomes the new value of prevValue in the next iteration.
+    - after all iterations are completed, the final value of prevValue is returned by reduce(), and becomes the total
+     amount of all items in the items array. This value is then returned by get totalAmount();
+
+- addProduct(product) {
+    this.items.push(product);
+    this.totalOutput.innerHTML = `<h2>Total: \$${this.totalAmount}</h2>`;
+  }
+    - change the hardcoded 1 in template literal to this.totalAmount
+
+-   set cartItems(value) {
+    this.items = value;
+    this.totalOutput.innerHTML = `<h2>Total: \$${this.totalAmount.toFixed(2)}</h2>`;
+  }
+    - The set cartItems(value) { ... } is a setter method for the cartItems property of the ShoppingCart class. This method is called when a 
+    value is assigned to the cartItems property, such as when a new item is added to the cart.
+
+    When the cartItems property is set, the method first updates the items array with the new value that was passed in. Then, it updates 
+    the HTML of the totalOutput element with the total amount of the items in the cart.
+
+The totalOutput element is assumed to be a reference to some HTML element in the DOM that displays the total amount of the items in the 
+cart. The innerHTML property of this element is set to a string that contains an HTML heading tag (<h2>) and a string template that uses 
+the $ symbol to interpolate the total amount of the items in the cart, which is calculated using the totalAmount getter method.
+
+The toFixed(2) method is used to round the total amount to two decimal places. This method converts the number to a string and adds 
+trailing zeros if necessary to ensure that the number has exactly two decimal places.
+
+In summary, the set cartItems(value) { ... } method updates the items array with the new value and updates the HTML of the totalOutput 
+element with the total amount of the items in the cart.
+
+INTRODUCING INHERITANCE 
+
+Base class
+    - post 
+        - imagePost
+            - title, text, creatorid
+            - imageUrl, imageDesc
+        - videoPost
+            - title, text, creatorid
+            - videoUrl, ageRating.
+    - repeat code on title, text, creatorid
+
+Extend base class
+    - videoPost inherits specific properties.
+
+IMPLEMENTING INHERITANCE 
+
+- class Component {
+  constructor(renderHookId) {
+    this.hookId = renderHookId;
+  }
+  createRootElement(tag, cssClasses, attributes) {
+    const rootElement = document.createElement(tag);
+    if (cssClasses) {
+      rootElement.className = cssClasses;
+    }
+    if (attributes && attributes.length > 0) {
+      for (const attr of attributes) {
+        rootElement.setAttribute(attr.name, attr.value);
+      }
+    }
+    document.getElementById(this.hookId).append(rootElement);
+    return rootElement;
+  }
+}
+
+    - In the given code, class Component is a base class that provides a common set of methods and properties for its derived classes. 
+    It has a constructor that takes a renderHookId parameter which is the id of an HTML element where the component will be rendered.
+
+The createRootElement method of the Component class is responsible for creating and returning a root element for the component. 
+This method takes three parameters - tag, cssClasses, and attributes. The tag parameter specifies the HTML tag name of the element to be 
+created. The cssClasses parameter specifies the CSS classes to be assigned to the element, and the attributes parameter is an array of 
+ElementAttribute objects that specify the HTML attributes to be assigned to the element.
+
+The createRootElement method creates an element using the specified tag name, assigns the specified CSS classes to the element if any, 
+and sets the specified HTML attributes to the element. Finally, the method appends the created element to the HTML element with the 
+renderHookId specified in the constructor and returns the created element.
+
+The Component class is designed to be inherited by other classes that need to render HTML elements. For example, the ShoppingCart 
+class is derived from the Component class and uses the createRootElement method to create the root element for the shopping cart component.
+
+Overall, the Component class provides a common interface for its derived classes to create and render HTML elements in a consistent way. 
+By inheriting from this class, other classes can reuse this functionality and build on top of it to create more complex components.
+
+    - The class ShoppingCart extends the class Component which means it inherits all the methods and properties from Component. 
+    By extending Component, the ShoppingCart class can make use of the createRootElement() method, which creates a root HTML element and 
+    appends it to the document. The ShoppingCart class uses this method to create a root element for the shopping cart, which is then used 
+    to render the contents of the shopping cart.
+
+Additionally, the ShoppingCart class overrides the render() method from the Component class to render the contents of the shopping cart. 
+In the render() method, it creates a section element for the shopping cart, sets the inner HTML of the section element to include the total 
+cost of the items in the cart, and creates a button for the user to order the items. It also uses the createRootElement() method from the 
+Component class to create a root element for the shopping cart and sets a property totalOutput to the h2 element containing the total 
+cost of the items in the cart.
+
+
+    - The Shop class also utilizes the Component class as a base class. It doesn't override any methods or properties of the Component class 
+    but instead uses it to create an instance of the ShoppingCart class and a ProductList object.
+
+In the render() method of the Shop class, a new instance of ShoppingCart is created, passing the renderHookId parameter as "app". 
+This is done by calling the Component constructor in the ShoppingCart class with the renderHookId argument.
+
+After the ShoppingCart instance is created, its render() method is called. This method is inherited from the Component class and 
+creates a new section element with the class cart and a placeholder total price. This section element is then appended to the HTML 
+element with the id of app.
+
+Next, a new instance of ProductList is created and its render() method is called. This method creates a ul element with the class 
+product-list. For each Product in the ProductList's products array, a new ProductItem object is created and its render() method is called, 
+creating a li element with the class product-item and the Product's information.
+
+Finally, the ProductList's render() method returns the ul element with all of the li elements appended to it. This ul element is then 
+appended to the HTML element with the id of app, effectively displaying the list of products for sale and the shopping cart with a 
+placeholder total price.
+
+
+
+USING INHERITANCE EVERYWHERE
+
+  render() {
+    this.createRootElement("ul", "product-list", [
+      new ElementAttribute("id", "prod-list"),
+    ]);
+    for (const prod of this.products) {
+      const productItem = new ProductItem(prod, "prod-list");
+      productItem.render();
+    }
+  }
+    - The changes made to the ProductList and Shop classes are in their render() methods.
+
+In ProductList, instead of creating a new ul element and appending it to the HTML document, the createRootElement() method of the Component 
+class is used to create the ul element and set its attributes. An array of ElementAttribute objects is passed to this method as the 
+attributes parameter. This allows for adding the id attribute to the ul element with the value "prod-list".
+The for loop in ProductList now creates new ProductItem objects by passing each product object and "prod-list" as parameters to the 
+constructor. The render() method of the ProductItem class is then called on each ProductItem object to render the product's HTML.
+
+- class Shop {
+  render() {
+    this.cart = new ShoppingCart("app");
+
+    this.cart.render();
+    const productList = new ProductList("app");
+    productList.render();
+  }
+}
+    - In Shop, a new ShoppingCart object is created by passing "app" as the parameter to the constructor. Its render() method is then called 
+    to render the cart's HTML. Finally, a new ProductList object is created by passing "app" as the parameter to the constructor. Its 
+    render() method is then called to render the list of products.
+
+
+OVERRIDING METHODS AND THE SUPER() CONSTRUCTOR
+
+- Inside of a constructor, this will refer to the object that is being created. (new)
+
+PRIVATE PROPERTIES 
+    - public
+        - access outside of the class/object
+        - the things you work with in your other code
+        - example: product.buy()
+    - private
+        - accessible only inside of the class/object
+        - the things you work with in your class only( to split and  re-use code)
+        - example: hard-coded(fallback) values, re-used class-specific logic
+
+The addition of private fields and properties is relatively new - in the past, such a feature was not part of JavaScript.
+
+Hence you might find many scripts that use a concept which you could describe as "pseudo-private" properties.
+
+It would look like this:
+
+class User {
+    constructor() {
+        this._role = 'admin';
+    }
+}
+ 
+// or directly in an object
+ 
+const product = {
+    _internalId: 'abc1'
+};
+What's that?
+
+It's a quite common convention to prefix private properties with an underscore (_) to signal that they should not be accessed from outside 
+of the object.
+
+Important: It's just a convention that should signal something! It does NOT technically prevent access. You CAN run this code without 
+errors for example:
+
+const product = {
+    _internalId: 'abc1'
+};
+console.log(product._internalId); // works!
+It's really just a hint that developers should respect. It's not as strict as the "real" private properties introduced recently 
+(#propertyName).
+
+INSTANCEOF OPERATOR
+BUILT IN CLASSES
+UNDERSTANDING OBJECT DESCRIPTORS 
+
